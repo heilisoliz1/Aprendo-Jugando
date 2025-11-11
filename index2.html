@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AprendiJuegos</title>
+<style>
+    * { box-sizing: border-box; font-family: 'Comic Sans MS', sans-serif; }
+    body {
+        margin: 0;
+        background: linear-gradient(135deg, #ffb6c1, #ff99cc, #ffd6e8);
+        background-size: 400% 400%;
+        animation: fondo 10s ease infinite;
+        color: #333;
+    }
+    @keyframes fondo {
+        0% {background-position: 0% 50%;}
+        50% {background-position: 100% 50%;}
+        100% {background-position: 0% 50%;}
+    }
+    header { text-align: center; background: #a70556; color: white; padding: 15px; }
+    header h1 span { color: #eeeee9; }
+    nav ul { display: flex; justify-content: center; gap: 20px; list-style: none; padding: 0; }
+    nav a { text-decoration: none; color: white; font-weight: bold; }
+    nav a.activo { border-bottom: 3px solid white; }
+    section { text-align: center; margin-top: 20px; }
+    .boton {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #ff66b2;
+        color: white;
+        border-radius: 20px;
+        text-decoration: none;
+        margin-top: 10px;
+    }
+    .boton:hover { background: #ff3385; }
+
+    .contenedor-juegos {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .cuadro-juego {
+        background: white;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 400px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .cuadro-juego:hover { transform: scale(1.03); }
+
+    canvas {
+        border: 2px solid #ff66b2;
+        width: 100%;
+        height: 300px;
+        touch-action: none;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    input, button, select {
+        padding: 10px;
+        margin: 5px;
+        border-radius: 8px;
+        border: none;
+        font-size: 16px;
+    }
+    button { background: #ff66b2; color: white; font-weight: bold; }
+    button:hover { background: #ff3385; }
+
+    @media (max-width: 600px) {
+        .contenedor-juegos { flex-direction: column; align-items: center; }
+        header h1 { font-size: 22px; }
+    }
+</style>
+</head>
+<body>
+<header>
+    <h1>🎉 Bienvenido a <span>Aprendo Jugando </span> 🧠</h1>
+    <nav>
+        <ul>
+            <li><a href="#" id="navInicio" class="activo">Inicio</a></li>
+            <li><a href="#" id="navJuegos">Juegos</a></li>
+            <li><a href="#" id="navPerfil">Perfil</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- Inicio -->
+<section id="inicio">
+    <h2>Aprende y juega de manera divertida 🌈</h2>
+    <p>Inicia sesión para comenzar a disfrutar los juegos educativos.</p>
+    <input type="text" id="nombreUsuario" placeholder="Ingresa tu nombre">
+    <button onclick="iniciarSesion()">Iniciar Sesión</button>
+</section>
+
+<!-- Juegos -->
+<section id="juegos" style="display:none;">
+    <h2>🎮 Zona de Juegos</h2>
+    <div class="contenedor-juegos">
+
+        <!-- 🎨 PINTAR -->
+        <div class="cuadro-juego">
+            <h3>🎨 Pinta libremente</h3>
+            <input type="color" id="colorPicker" value="#000000">
+            <select id="grosorPincel">
+                <option value="2">Fino</option>
+                <option value="5" selected>Medio</option>
+                <option value="10">Grueso</option>
+            </select>
+            <canvas id="pizarra"></canvas><br>
+            <button onclick="limpiarPizarra()">Limpiar</button>
+        </div>
+
+        <!-- ➕ SUMA -->
+        <div class="cuadro-juego">
+            <h3>➕ Suma Divertida</h3>
+            <p id="preguntaSuma"></p>
+            <input type="number" id="respuestaSuma" placeholder="Tu respuesta">
+            <button onclick="comprobarSuma()">Comprobar</button>
+            <p id="resultadoSuma"></p>
+        </div>
+
+        <!-- ➖ RESTA -->
+        <div class="cuadro-juego">
+            <h3>➖ Resta Divertida</h3>
+            <p id="preguntaResta"></p>
+            <input type="number" id="respuestaResta" placeholder="Tu respuesta">
+            <button onclick="comprobarResta()">Comprobar</button>
+            <p id="resultadoResta"></p>
+        </div>
+
+        <!-- ✖️ MULTIPLICACIÓN -->
+        <div class="cuadro-juego">
+            <h3>✖️ Multiplicación Divertida</h3>
+            <p id="preguntaMulti"></p>
+            <input type="number" id="respuestaMulti" placeholder="Tu respuesta">
+            <button onclick="comprobarMulti()">Comprobar</button>
+            <p id="resultadoMulti"></p>
+        </div>
+    </div>
+</section>
+
+<!-- Perfil -->
+<section id="perfil" style="display:none;">
+    <h2>👤 Mi Perfil</h2>
+    <p><strong>Nombre:</strong> <span id="mostrarNombre">Invitado</span></p>
+    <button onclick="cerrarSesion()">Cerrar Sesión</button>
+</section>
+
+<script>
+// Navegación
+const inicio = document.getElementById("inicio");
+const juegos = document.getElementById("juegos");
+const perfil = document.getElementById("perfil");
+const navInicio = document.getElementById("navInicio");
+const navJuegos = document.getElementById("navJuegos");
+const navPerfil = document.getElementById("navPerfil");
+
+function mostrar(seccion) {
+    inicio.style.display = seccion === "inicio" ? "block" : "none";
+    juegos.style.display = seccion === "juegos" ? "block" : "none";
+    perfil.style.display = seccion === "perfil" ? "block" : "none";
+    navInicio.classList.toggle("activo", seccion === "inicio");
+    navJuegos.classList.toggle("activo", seccion === "juegos");
+    navPerfil.classList.toggle("activo", seccion === "perfil");
+}
+navInicio.onclick = () => mostrar("inicio");
+navJuegos.onclick = () => mostrar("juegos");
+navPerfil.onclick = () => mostrar("perfil");
+
+// Inicio de sesión
+function iniciarSesion() {
+    const nombre = document.getElementById("nombreUsuario").value.trim();
+    if (nombre === "") { alert("Por favor, ingresa tu nombre"); return; }
+    localStorage.setItem("usuario", nombre);
+    document.getElementById("mostrarNombre").textContent = nombre;
+    mostrar("juegos");
+}
+function cerrarSesion() {
+    localStorage.removeItem("usuario");
+    document.getElementById("nombreUsuario").value = "";
+    document.getElementById("mostrarNombre").textContent = "Invitado";
+    mostrar("inicio");
+}
+window.onload = () => {
+    const nombre = localStorage.getItem("usuario");
+    if (nombre) {
+        document.getElementById("mostrarNombre").textContent = nombre;
+        mostrar("juegos");
+    }
+    generarSuma(); generarResta(); generarMulti();
+    ajustarCanvas();
+};
+
+// 🎨 PIZARRA FUNCIONAL CON GROSOR
+const canvas = document.getElementById("pizarra");
+const ctx = canvas.getContext("2d");
+let dibujando = false;
+
+function ajustarCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const temp = ctx.getImageData(0, 0, canvas.width, canvas.height); // guardar contenido
+    canvas.width = rect.width;
+    canvas.height = 300;
+    ctx.putImageData(temp, 0, 0); // restaurar contenido
+}
+
+function obtenerPosicion(e) {
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches && e.touches.length > 0) {
+        return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    } else { return { x: e.offsetX, y: e.offsetY }; }
+}
+
+function iniciarDibujo(e) { e.preventDefault(); dibujando = true; const pos = obtenerPosicion(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+function dibujar(e) {
+    if (!dibujando) return;
+    e.preventDefault();
+    const pos = obtenerPosicion(e);
+    ctx.strokeStyle = document.getElementById("colorPicker").value;
+    ctx.lineWidth = parseInt(document.getElementById("grosorPincel").value);
+    ctx.lineCap = "round";
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+}
+function detenerDibujo() { dibujando = false; ctx.closePath(); }
+
+canvas.addEventListener("mousedown", iniciarDibujo);
+canvas.addEventListener("mousemove", dibujar);
+canvas.addEventListener("mouseup", detenerDibujo);
+canvas.addEventListener("mouseleave", detenerDibujo);
+
+canvas.addEventListener("touchstart", iniciarDibujo, { passive: false });
+canvas.addEventListener("touchmove", dibujar, { passive: false });
+canvas.addEventListener("touchend", detenerDibujo);
+
+function limpiarPizarra() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+// ➕ SUMA
+let num1, num2;
+function generarSuma() { num1 = Math.floor(Math.random() * 10); num2 = Math.floor(Math.random() * 10); document.getElementById("preguntaSuma").textContent = `${num1} + ${num2} = ?`; }
+function comprobarSuma() {
+    const resp = parseInt(document.getElementById("respuestaSuma").value);
+    document.getElementById("resultadoSuma").textContent = resp === num1 + num2 ? "✅ Correcto" : "❌ Incorrecto";
+    generarSuma();
+}
+
+// ➖ RESTA
+let r1, r2;
+function generarResta() { r1 = Math.floor(Math.random() * 10); r2 = Math.floor(Math.random() * r1); document.getElementById("preguntaResta").textContent = `${r1} - ${r2} = ?`; }
+function comprobarResta() {
+    const resp = parseInt(document.getElementById("respuestaResta").value);
+    document.getElementById("resultadoResta").textContent = resp === r1 - r2 ? "✅ Correcto" : "❌ Incorrecto";
+    generarResta();
+}
+
+// ✖️ MULTIPLICACIÓN
+let m1, m2;
+function generarMulti() { m1 = Math.floor(Math.random() * 10); m2 = Math.floor(Math.random() * 10); document.getElementById("preguntaMulti").textContent = `${m1} × ${m2} = ?`; }
+function comprobarMulti() {
+    const resp = parseInt(document.getElementById("respuestaMulti").value);
+    document.getElementById("resultadoMulti").textContent = resp === m1 * m2 ? "✅ Correcto" : "❌ Incorrecto";
+    generarMulti();
+}
+</script>
+</body>
+</html>
+
